@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   ScrollView,
@@ -72,6 +72,10 @@ function App(): React.JSX.Element {
    */
   const safePadding = '5%';
 
+  useEffect(() => {
+    recursiveTimer()
+  }, [])
+
   return (
     <View style={backgroundStyle}>
       <StatusBar
@@ -129,3 +133,35 @@ const styles = StyleSheet.create({
 });
 
 export default App;
+
+
+
+/* eslint-disable init-declarations*/
+let idleTimer: ReturnType<typeof requestIdleCallback>;
+let ntbtTimer: ReturnType<typeof setTimeout>;
+/* eslint-enable init-declarations*/
+
+const BLOCKING_WINDOW_DURATION = 2000;
+
+export const recursiveTimer = (measureName: string) => {
+    if (idleTimer) {
+        cancelIdleCallback(idleTimer);
+    }
+    clearTimeout(ntbtTimer);
+
+    const step = () => {
+        idleTimer = requestIdleCallback(() => {
+          console.log('request idle timer')
+            step();
+        });
+        console.log('idleTimer', idleTimer)
+    };
+    ntbtTimer = setTimeout(() => {
+        if (idleTimer) {
+            cancelIdleCallback(idleTimer);
+        }
+    }, BLOCKING_WINDOW_DURATION);
+    step();
+};
+
+
